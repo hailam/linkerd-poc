@@ -54,19 +54,31 @@ curl -s http://localhost:8080/call-echo | jq
 ```
 
 Expected output:
+
 ```json
 {
-  "self": { "app_name": "caller" },
+  "self": {
+    "app_name": "caller",
+    "hostname": "caller-app-865f97c8b4-6x2ql"
+  },
   "echo_response": {
-    "self": { "app_name": "echo-server" },
+    "self": {
+      "app_name": "echo-server",
+      "hostname": "echo-service-7c76546b4f-jtqlv"
+    },
     "caller": {
-      "l5d_client_id": "default.mesh-demo.serviceaccount.identity.linkerd.cluster.local"
+      "l5d_client_id": "default.mesh-demo.serviceaccount.identity.linkerd.cluster.local",
+      "raw_header": "default.mesh-demo.serviceaccount.identity.linkerd.cluster.local"
+    },
+    "linkerd_headers": {
+      "l5d-client-id": "default.mesh-demo.serviceaccount.identity.linkerd.cluster.local"
     }
   }
 }
 ```
 
 **If `caller` is empty:** Linkerd is not installed or sidecars not injected. Run:
+
 ```bash
 linkerd check
 kubectl -n mesh-demo rollout restart deploy
