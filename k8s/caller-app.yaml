@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: caller-app
+  namespace: mesh-demo
+  labels:
+    app: caller-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: caller-app
+  template:
+    metadata:
+      labels:
+        app: caller-app
+      annotations:
+        linkerd.io/inject: enabled
+    spec:
+      containers:
+        - name: caller-app
+          image: linkerd-demo:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 8080
+          env:
+            - name: APP_NAME
+              value: "caller"
+            - name: ECHO_SERVICE_URL
+              value: "http://echo-service.mesh-demo.svc.cluster.local"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 10
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: caller-app
+  namespace: mesh-demo
+  labels:
+    app: caller-app
+spec:
+  type: ClusterIP
+  ports:
+    - port: 80
+      targetPort: 8080
+      protocol: TCP
+  selector:
+    app: caller-app
